@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: assign-serv-service
+spec:
+  ports:
+    - port: 8001
+      targetPort: 80
+  selector:
+    app: assignments # pod identifier, same as in row 19
+  type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: assignment-service # name of the pod
+  labels:
+    app: assignments # pod identifier
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: assignmentservice
+#   template: #pod
+#     metadata:
+#       labels:
+#         app: assignmentservice
+spec:
+  containers:
+    - name: assignment-service #microservice
+      image: petersebestyen/assignmentservice
+      ports: # pod specific
+        - name: assignment-port
+          containerPort: 5001
+    - name: mysql #database
+      image: mysql:latest
+      env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root
+        - name: SECRET_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: username
+        - name: SECRET_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: password
+      ports: # pod specific
+        - name: mysql-port
+          containerPort: 3306
+      volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/opt/mysql
+  volumes:
+    - name: mssql-persistent-storage
+      persistentVolumeClaim:
+        claimName: mssql-persistent-storage

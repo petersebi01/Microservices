@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /users
+            backend: 
+              serviceName: user-auth-service
+              servicePort: 8080
+          - path: /rules
+            backend:
+              serviceName: user-auth-service
+              servicePort: 8080
+          - path: /assignments
+            backend:
+              serviceName: assign-serv-service
+              servicePort: 8001
+          - path: /employees
+            backend:
+              serviceName: assign-serv-service
+              servicePort: 8001
+          - path: /tasks
+            backend:
+              serviceName: assign-serv-service
+              servicePort: 8001
+          - path: /chat
+            backend:
+              serviceName: chat-serv-service
+              servicePort: 8002
+            

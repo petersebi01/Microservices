@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sql-database-persistence
+  labels:
+    type: local
+spec:
+  storageClassName: sqldatabase
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/home/docker/microservice/database"

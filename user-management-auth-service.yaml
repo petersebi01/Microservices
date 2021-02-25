@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-auth-service
+spec:
+  ports:
+    - port: 8080
+      targetPort: 80 # port of the pod
+  selector:
+    app: user # has to be the same as row 19
+  type: LoadBalancer
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-auth-manage-service
+  labels:
+    app: user # service can identify from this
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # milyen podokat akar a megadott számban futtatni
+      userapp: user # kulcs-érték
+  template: # template of the pod installation
+    metadata: #container and pod specifications
+      labels:
+        userapp: user
+    spec:
+      containers:
+        - name: user-auth-service
+          image: petersebestyen/userservice
+          ports:
+            - name: user-port
+              containerPort: 8000
+        - name: mysql
+          image: mysql
+          env:
+            - name: SECRET_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: username
+            - name: SECRET_PASSWORD
+              valueFrom: 
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
+          ports:
+            - name: mysql-port
+              containerPort: 3306
+          volumeMounts:
+            - name: mysql-chat-storage
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: mysql-chat-storage
+          persistentVolumeClaim:
+            claimName: mysql-persistent-storage
+
